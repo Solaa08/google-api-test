@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <script src="https://accounts.google.com/gsi/client" onload="initTokenClient()" async defer></script>
+</head>
+
+<body>
+  <script>
+    var client;
+    var myHeaders = new Headers();
+
+    function initTokenClient() {
+      client = google.accounts.oauth2.initTokenClient({
+        client_id: '274154089951-vc4ddl8pha0460l1ghsss91m6cb8jguf.apps.googleusercontent.com',
+        scope: 'https://www.googleapis.com/auth/webmasters',
+        // ux_mode: 'popup',
+        callback: (response) => {
+          myHeaders.append('Authorization', 'Bearer ' + response.access_token);
+          var myInit = {
+            method: 'GET',
+            headers: myHeaders,
+            cache: 'default'
+          };
+          console.log(response)
+          fetch('https://www.googleapis.com/webmasters/v3/sites', myInit)
+            .then(response => response.json())
+            .then(function (data) {
+              console.log(data)
+              const siteUrl = data.siteEntry[6].siteUrl
+              getSite(siteUrl)
+            })
+
+        },
+      });
+    }
+
+    function requestAccessToken() {
+      // Request authorization code and obtain user consent
+      client.requestCode();
+    }
+
+
+
+    var option = {
+      method: 'POST',
+      body: JSON.stringify({
+        "startDate": "2022-04-01",
+        "endDate": "2022-07-07",
+      }),
+      headers: myHeaders
+    }
+
+    function getSite(siteUrl) {
+      fetch(`https://www.googleapis.com/webmasters/v3/sites/${siteUrl}/searchAnalytics/query`, option).then(response =>
+        response.json()).then(data => console.log(data))
+    }
+
+
+//     return (
+//         <div>
+//             <p>Welcome, {session.user.name}</p>
+//         <button onClick={() => signOut()}>Se déconnecter</button>
+//         </div>
+//     )
+// } else {
+//     return (
+//         <div>
+//             <p>Vous n'êtes pas connecté</p>
+//         <button onClick={() => signIn()}>Se connecter</button>
+//         </div>
+//     )
+  </script>
+  <button onclick="client.requestAccessToken();">Load Your Calendar</button>
+</body>
+
+</html>
+
+
